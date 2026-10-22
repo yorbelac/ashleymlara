@@ -13,6 +13,10 @@ A few things about her:
 
 Her partner set up the project and handles the service accounts and API keys. If she gets stuck on account or billing access, suggest she ask them.
 
+**Not every session is Ashley.** Her partner sometimes works here directly on setup and infrastructure. If the person says they aren't Ashley, skip the tutoring and leave the learning journal alone for that session.
+
+**Keep her out of the plumbing.** She should be able to just design. Handle deploy and config chores yourself instead of handing them to her, in particular **Vercel environment variables**: `VERCEL_TOKEN` in `.env` lets you manage them through the Vercel REST API (project `ashleymlara`, id `prj_OWJo8MTvpSTfRkPrnnTI2JHzAE2Q`). When a new key is added to `.env`, push it to Vercel (Production + Preview) yourself. Secrets (passwords, API keys, connection strings, signing secrets) go up as type **`sensitive`** (write-only, nobody can read them back in the dashboard). Only plainly non-secret config (account IDs, public URLs) uses `encrypted`. Vercel can't change an existing var's type, so delete it and create it again. Read values via `node --env-file=.env` and never print them. Env changes only take effect after a redeploy. Still teach her the *idea* at a high level when it comes up (e.g. "the live site keeps its own copy of the keys"), but don't make her click through dashboards.
+
 ## Your job: teach while you build
 
 You are her **coding tutor first and her code-writer second.** A session where she ships a feature but understands none of it is a failed session.
@@ -48,7 +52,7 @@ Update [docs/learning/progress.md](docs/learning/progress.md) during the session
 | Styling | **Tailwind CSS v4**. The design tokens (colors, fonts) live in `@theme` in [src/app/globals.css](src/app/globals.css) |
 | Hosting | **Vercel**. Pushing to `main` on GitHub deploys the live site automatically |
 | Database | **Neon** Postgres via `pg` (node-postgres) + Vercel's `attachDatabasePool`. Project linked in `.neon` / `neon.ts` |
-| Coming next | **Cloudflare R2** (image/file storage; keys are already in `.env`), **Resend** (email), **Google OAuth** (sign-in) |
+| Coming next | **Cloudflare R2** (image/file storage; keys are already in `.env`), **Resend** (email) |
 
 **Next.js 16 is newer than your training data.** As AGENTS.md says, check the bundled docs in `node_modules/next/dist/docs/` before using an API you're unsure of.
 
@@ -73,6 +77,7 @@ Update [docs/learning/progress.md](docs/learning/progress.md) during the session
 - Anyone can register at `/register` (name, email, 10+ character password). Users live in the `users` table. Passwords are stored as scrypt `salt:hash`, never as plain text. Emails are stored lowercase.
 - Each user has a `role`: `user` (default) or `admin`. **Admins** land on `/studio` after login; **regular users** land on `/account`. Regular users who try `/studio` get sent to `/account`.
 - Give or remove admin access with `npm run make-admin -- someone@example.com` (add `--remove` to take it away). The person has to register first. The role is read from the database on every request, so the change takes effect immediately.
+- **Sign in with Google** (no Auth.js, just [src/lib/google.ts](src/lib/google.ts) + `jose`): `/api/auth/google` → Google → `/api/auth/callback/google` (state + nonce + PKCE, ID token verified). Users are matched by `google_sub`, then by email. Linking an existing password account clears its password, because that email was never verified and Google's is. Needs `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`. Every new domain needs its `/api/auth/callback/google` URI added in Google Cloud Console; preview URLs can't be added (no wildcards).
 - Sessions: on login/register we sign a JWT (HS256, `jose`) whose `sub` is the user's id, stored in an httpOnly, SameSite=Lax cookie for 7 days. Needs `SESSION_SECRET` (32+ chars) in `.env` and Vercel.
 - **Every private thing must call `requireUser()` or `requireAdmin()`**: each private page component *and* each server action that reads or changes private data. Server actions are public endpoints, so hiding a button is not protection. Teach her this the first time she builds a Studio tool.
 - Under Cache Components, reading the cookie must happen inside a `<Suspense>` boundary (see how `studio/page.tsx` does it). Don't `await` the user at the top level of a layout.
@@ -110,7 +115,8 @@ Playwright and Chromium are installed so you can *see* the page. **Don't screens
 - Keys go in `.env` (git-ignored) and in **Vercel → Project → Settings → Environment Variables**. Never in code, never committed.
 - **Never print, echo, or repeat a key's value** in chat, logs, or commits. If she pastes one into chat, kindly tell her and suggest the key be rotated (regenerated).
 - Anything prefixed `NEXT_PUBLIC_` is sent to every visitor's browser. Never put secrets there.
-- When adding a service, add its env var names to `.env.example` and to [src/lib/services.ts](src/lib/services.ts), so `/api/health` can confirm the keys are set.
+- When adding a service, add its env var names to `.env.example` and to [src/lib/services.ts](src/lib/services.ts), so `/api/health` can confirm the keys are set. Then push the values to Vercel yourself (see "Keep her out of the plumbing" above).
+- `VERCEL_TOKEN` and `CLOUDFLARE_TOKEN` are admin tokens for tooling. The app doesn't need them, so don't push them to Vercel.
 - Teach her *why*: if a key is in the code, anyone who sees the code can use her accounts.
 
 ### Git and deploying
@@ -124,6 +130,6 @@ Playwright and Chromium are installed so you can *see* the page. **Don't screens
 3. ✅ **Neon** connected (`/api/health` reports `"database": true`). Tables: `users`. Next: her first content table (e.g., her toy collection) as a new migration file. Plain SQL + `pg` for now; discuss an ORM (Drizzle) with her before adding one.
 4. **Cloudflare R2**: photo uploads. It's S3-compatible; use presigned URLs so files upload straight from the browser to R2.
 5. **Resend**: contact form or notification emails, sent from a Server Action.
-6. **Google OAuth**: "Sign in with Google" as a nicer option alongside (or instead of) the password. Match Google users to the `users` table by email and issue the same session, so `requireUser()`/`requireAdmin()` keep working everywhere.
+6. ✅ **Google OAuth**: "Continue with Google" on `/login` and `/register`, alongside the password. Issues the same session, so `requireUser()`/`requireAdmin()` work unchanged.
 
 Each one is a chance to teach a big idea (databases, file storage, APIs, authentication). Introduce the idea before the code.

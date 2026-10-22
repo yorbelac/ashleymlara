@@ -39,13 +39,14 @@ export async function login(_prev: FormState, formData: FormData): Promise<FormS
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
 
-  const { rows } = await db().query<{ id: string; password_hash: string; role: string }>(
+  const { rows } = await db().query<{ id: string; password_hash: string | null; role: string }>(
     "SELECT id, password_hash, role FROM users WHERE email = $1",
     [email],
   );
   const user = rows[0];
 
-  if (!(await verifyPassword(password, user?.password_hash))) {
+  // Google-only accounts have no password, so they fail here like a wrong password would
+  if (!(await verifyPassword(password, user?.password_hash ?? undefined))) {
     // A small pause makes password guessing slower
     await new Promise((r) => setTimeout(r, 750));
     // Same message whether the email or password was wrong, so we don't hint which

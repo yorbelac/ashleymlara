@@ -13,7 +13,7 @@ export const services = {
     env: ["CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_ACCESS_KEY", "CLOUDFLARE_SECRET_ACCESS_KEY", "CLOUDFLARE_PUBLIC_URL"],
   },
   resend: { label: "Resend (email)", env: ["RESEND_API_KEY"] },
-  google: { label: "Google sign-in", env: ["AUTH_SECRET", "AUTH_GOOGLE_ID", "AUTH_GOOGLE_SECRET"] },
+  google: { label: "Google sign-in", env: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"] },
 } as const;
 
 /** Which services have all their keys filled in. Reports true/false only, never the values. */
