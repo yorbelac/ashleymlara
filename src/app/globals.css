@@ -1,0 +1,100 @@
+/*
+ * globals.css: styles that apply to the whole site.
+ *
+ * We use Tailwind CSS. Instead of writing CSS rules by hand, you put small
+ * "utility" class names right on your HTML (e.g. `text-pink`, `p-4`).
+ * Tailwind scans the code and only ships the classes you actually use,
+ * which keeps the site tiny and fast.
+ */
+@import "tailwindcss";
+
+/*
+ * @theme = our design tokens. Every color/font defined here becomes a
+ * Tailwind class automatically. `--color-pink` gives you `text-pink`,
+ * `bg-pink`, `border-pink`, etc. Change a value here and it changes
+ * everywhere on the site.
+ */
+@theme {
+  /* The classic vaporwave palette */
+  --color-pink: #ff71ce;
+  --color-cyan: #01cdfe;
+  --color-mint: #05ffa1;
+  --color-lilac: #b967ff;
+  --color-lemon: #fffb96;
+
+  /* Backgrounds + text */
+  --color-night: #1a0b2e;
+  --color-dusk: #2d1b4e;
+  --color-cream: #fdf6ff;
+
+  /* Fonts are loaded in layout.tsx and passed in as CSS variables */
+  --font-display: var(--font-righteous), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-night);
+  color: var(--color-cream);
+}
+
+/* A visible focus ring for keyboard users (accessibility!) */
+:focus-visible {
+  outline: 2px solid var(--color-cyan);
+  outline-offset: 3px;
+}
+
+/* ---------- Vaporwave sunset: pure CSS, zero image downloads ---------- */
+
+/* The striped retro sun */
+.retro-sun {
+  background: linear-gradient(to bottom, var(--color-lemon), var(--color-pink) 60%, var(--color-lilac));
+  /* Cut horizontal "blinds" into the bottom half of the sun */
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0 55%,
+    transparent 55% 58%,
+    #000 58% 66%,
+    transparent 66% 70%,
+    #000 70% 77%,
+    transparent 77% 82%,
+    #000 82% 88%,
+    transparent 88% 94%,
+    #000 94%
+  );
+}
+
+/* The neon grid floor, tilted back in 3D */
+.retro-grid {
+  background-image:
+    linear-gradient(var(--color-pink) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-pink) 1px, transparent 1px);
+  background-size: 48px 48px;
+  transform: perspective(300px) rotateX(60deg);
+  transform-origin: top center;
+  mask-image: linear-gradient(to bottom, #000, transparent 85%);
+  animation: grid-scroll 2.5s linear infinite;
+}
+
+@keyframes grid-scroll {
+  to {
+    background-position: 0 48px;
+  }
+}
+
+/* Respect visitors who've asked their device for less motion */
+@media (prefers-reduced-motion: reduce) {
+  .retro-grid {
+    animation: none;
+  }
+}
+
+.neon-text {
+  text-shadow:
+    0 0 6px var(--color-pink),
+    0 0 18px var(--color-lilac);
+}
