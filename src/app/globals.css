@@ -22,6 +22,12 @@
   --color-lilac: #b967ff;
   --color-lemon: #fffb96;
 
+  /* Borrowed from Cosmic Sundae, Ashley's shop */
+  --color-sundae: #ef5795;
+  --color-sunshine: #ffcd34;
+  --color-teal: #35b2ae;
+  --color-grape: #6b35bc;
+
   /* Backgrounds + text */
   --color-night: #1a0b2e;
   --color-dusk: #2d1b4e;
@@ -86,9 +92,83 @@ body {
   }
 }
 
+/* ---------- Twinkling stars in the hero ---------- */
+.twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+/* ---------- Scrolling marquee (a nod to Cosmic Sundae) ---------- */
+/* The list is printed twice; sliding it left by half makes a seamless loop. */
+.marquee-track {
+  animation: marquee 40s linear infinite;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------- Holographic trading-card border ---------- */
+/* A rainbow foil edge, like a shiny card pulled from a pack */
+.holo {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--color-dusk), var(--color-night)) padding-box,
+    conic-gradient(
+        from var(--holo-angle, 0deg),
+        var(--color-pink),
+        var(--color-sunshine),
+        var(--color-mint),
+        var(--color-cyan),
+        var(--color-lilac),
+        var(--color-pink)
+      )
+      border-box;
+}
+
+/* Lets the browser animate the gradient's angle smoothly */
+@property --holo-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.holo:hover {
+  animation: holo-spin 3s linear infinite;
+}
+
+@keyframes holo-spin {
+  to {
+    --holo-angle: 360deg;
+  }
+}
+
+/* Rainbow text, Trapper Keeper style */
+.rainbow-text {
+  background: linear-gradient(90deg, var(--color-pink), var(--color-sunshine), var(--color-mint), var(--color-cyan), var(--color-lilac));
+  background-clip: text;
+  color: transparent;
+}
+
 /* Respect visitors who've asked their device for less motion */
 @media (prefers-reduced-motion: reduce) {
-  .retro-grid {
+  .retro-grid,
+  .twinkle,
+  .marquee-track,
+  .holo:hover {
     animation: none;
   }
 }
